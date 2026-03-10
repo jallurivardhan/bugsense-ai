@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 from uuid import UUID
 
@@ -14,6 +13,7 @@ from app.schemas import (
     BugAnalysisResponse,
     BugAnalysisResult,
 )
+from app.services.bug_analyzer import bug_analyzer
 
 router = APIRouter()
 
@@ -42,49 +42,53 @@ def _to_bug_analysis_response(model: BugAnalysis) -> BugAnalysisResponse:
     )
 
 
-@router.post(
-    "",
-    response_model=BugAnalysisResponse,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("", response_model=BugAnalysisResponse, status_code=status.HTTP_201_CREATED)
 async def create_bug_analysis(
-    payload: BugAnalysisCreate, db: AsyncSession = Depends(get_db)
+    payload: BugAnalysisCreate,
+    db: AsyncSession = Depends(get_db),
 ) -> BugAnalysisResponse:
-    mock_result = {
-        "severity": "High",
-        "priority": "P1",
-        "component": "Authentication",
-        "repro_steps": [
-            "Open login page",
-            "Enter invalid credentials",
-            "Click submit",
-        ],
-        "reasoning": (
-            "Based on the description, this appears to be a critical "
-            "authentication issue."
-        ),
-        "missing_info": ["Browser version", "Expected behavior"],
-    }
+    """Analyze a bug report using AI."""
 
-    now = datetime.utcnow()
+    result = bug_analyzer.analyze(
+        title=payload.title,
+        description=payload.description,
+        environment=payload.environment,
+    )
+
+    if not result["success"]:
+        severity = None
+        priority = None
+        component = None
+        repro_steps: List[str] = []
+        reasoning = f"AI analysis failed: {result.get('error', 'Unknown error')}"
+        missing_info: List[str] = []
+        raw_response = result.get("raw_response")
+        schema_valid = False
+    else:
+        severity = result.get("severity")
+        priority = result.get("priority")
+        component = result.get("component")
+        repro_steps = result.get("repro_steps", [])
+        reasoning = result.get("reasoning")
+        missing_info = result.get("missing_info", [])
+        raw_response = result.get("raw_response")
+        schema_valid = result.get("schema_valid", True)
 
     instance = BugAnalysis(
         title=payload.title,
         description=payload.description,
         environment=payload.environment,
-        severity=mock_result["severity"],
-        priority=mock_result["priority"],
-        component=mock_result["component"],
-        repro_steps="\n".join(mock_result["repro_steps"]),
-        reasoning=mock_result["reasoning"],
-        missing_info="\n".join(mock_result["missing_info"]),
-        raw_response=mock_result,
-        model_version="mock-llama3.2",
-        prompt_version="v1",
-        latency_ms=1200,
-        schema_valid=True,
-        created_at=now,
-        updated_at=now,
+        severity=severity,
+        priority=priority,
+        component=component,
+        repro_steps="\n".join(repro_steps) if repro_steps else None,
+        reasoning=reasoning,
+        missing_info="\n".join(missing_info) if missing_info else None,
+        raw_response=raw_response,
+        model_version=result.get("model_version", "unknown"),
+        prompt_version=result.get("prompt_version", "v1.0"),
+        latency_ms=result.get("latency_ms", 0),
+        schema_valid=schema_valid,
     )
 
     db.add(instance)

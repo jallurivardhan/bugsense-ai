@@ -1,13 +1,19 @@
 from fastapi import APIRouter
-from datetime import datetime
+
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 
-@router.get("/health")
+
+@router.get("")
 async def health_check():
+    """Check API and Ollama health."""
+    ollama_healthy = ai_service.check_health()
+
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
-        "service": "ai-assistant-api",
-        "version": "0.1.0"
+        "ollama": {
+            "status": "connected" if ollama_healthy else "disconnected",
+            "model": ai_service.model,
+        },
     }

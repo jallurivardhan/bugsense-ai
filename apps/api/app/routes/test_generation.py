@@ -14,6 +14,7 @@ from app.schemas import (
     TestGenerationListResponse,
     TestGenerationResponse,
 )
+from app.services.test_generator import test_generator
 
 router = APIRouter()
 
@@ -35,56 +36,33 @@ def _to_test_generation_response(model: TestGeneration) -> TestGenerationRespons
     )
 
 
-@router.post(
-    "",
-    response_model=TestGenerationResponse,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("", response_model=TestGenerationResponse, status_code=status.HTTP_201_CREATED)
 async def create_test_generation(
     payload: TestGenerationCreate,
     db: AsyncSession = Depends(get_db),
 ) -> TestGenerationResponse:
-    mock_tests = [
-        {
-            "name": "Test valid login",
-            "steps": [
-                "Navigate to login",
-                "Enter valid credentials",
-                "Click submit",
-            ],
-            "expected_result": "User is logged in successfully",
-            "gherkin": (
-                "Given I am on the login page\n"
-                "When I enter valid credentials\n"
-                "Then I should be logged in"
-            ),
-        },
-        {
-            "name": "Test invalid login",
-            "steps": [
-                "Navigate to login",
-                "Enter invalid credentials",
-                "Click submit",
-            ],
-            "expected_result": "Error message is displayed",
-            "gherkin": (
-                "Given I am on the login page\n"
-                "When I enter invalid credentials\n"
-                "Then I should see an error message"
-            ),
-        },
-    ]
+    """Generate test cases from a requirement using AI."""
+
+    result = test_generator.generate(
+        requirement=payload.requirement,
+        include_gherkin=payload.include_gherkin,
+    )
+
+    if not result["success"]:
+        tests: list[dict] = []
+    else:
+        tests = result.get("tests", [])
 
     now = datetime.utcnow()
 
     instance = TestGeneration(
         requirement=payload.requirement,
         include_gherkin=payload.include_gherkin,
-        generated_tests=mock_tests,
-        generation_metadata={"source": "mock"},
-        model_version="mock-llama3.2",
-        prompt_version="v1",
-        latency_ms=900,
+        generated_tests=tests,
+        generation_metadata={},
+        model_version=result.get("model_version", "unknown"),
+        prompt_version=result.get("prompt_version", "v1.0"),
+        latency_ms=result.get("latency_ms", 0),
         created_at=now,
         updated_at=now,
     )
