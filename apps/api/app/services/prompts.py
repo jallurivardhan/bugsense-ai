@@ -1,7 +1,13 @@
 BUG_ANALYSIS_SYSTEM_PROMPT = """You are an expert QA engineer and bug triage specialist. 
 Analyze bug reports and extract structured information.
 Always respond with valid JSON matching the exact schema provided.
-Be precise and consistent in your analysis."""
+Be precise and consistent in your analysis.
+
+When relevant documentation is provided, use it to:
+- Better identify the affected component
+- Understand the system architecture
+- Provide more accurate severity assessment
+- Suggest more specific reproduction steps"""
 
 
 BUG_ANALYSIS_USER_PROMPT = """Analyze this bug report and extract structured triage information.
@@ -9,6 +15,8 @@ BUG_ANALYSIS_USER_PROMPT = """Analyze this bug report and extract structured tri
 Bug Title: {title}
 Description: {description}
 Environment: {environment}
+
+{rag_context}
 
 Respond with JSON in this exact format:
 {{
@@ -25,7 +33,7 @@ Rules:
 - priority: P1 (fix immediately), P2 (fix soon), P3 (fix when possible), P4 (backlog)
 - component: Identify the most likely affected component based on the description
 - repro_steps: Extract or infer reproduction steps from the description
-- reasoning: Explain why you chose this severity and priority
+- reasoning: Explain why you chose this severity and priority. Reference relevant documentation if provided.
 - missing_info: List any information that would help diagnose the bug
 
 Respond ONLY with the JSON object, no additional text."""

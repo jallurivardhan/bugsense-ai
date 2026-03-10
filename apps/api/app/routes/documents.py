@@ -1,5 +1,7 @@
 import os
+import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import List
 from uuid import UUID
 
@@ -15,6 +17,7 @@ from app.schemas import (
     DocumentResponse,
     DocumentUploadResponse,
 )
+from app.services.rag_service import rag_service
 
 UPLOAD_DIR = "data/uploads"
 
@@ -43,37 +46,81 @@ async def upload_document(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ) -> DocumentUploadResponse:
-    # Ensure upload directory exists
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    """Upload and index a document."""
+    # Validate file type
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    allowed_extensions = {".pdf", ".txt", ".md", ".docx"}
+
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"File type {file_ext} not supported. "
+                f"Allowed: {', '.join(sorted(allowed_extensions))}"
+            ),
+        )
 
     # Save file
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    upload_dir = Path("data/uploads")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    file_id = str(uuid.uuid4())
+    file_path = upload_dir / f"{file_id}{file_ext}"
+
+    content = await file.read()
+    file_size = len(content)
+
     async with aiofiles.open(file_path, "wb") as out_file:
-        content = await file.read()
         await out_file.write(content)
 
     now = datetime.utcnow()
-    file_size = os.path.getsize(file_path)
 
-    # Determine file_type from extension
-    _, ext = os.path.splitext(file.filename)
-    file_type = ext.lstrip(".").lower() or "txt"
-
-    instance = Document(
+    # Create database record with status "processing"
+    db_document = Document(
         filename=file.filename,
-        file_type=file_type,
+        file_type=file_ext.replace(".", ""),
         file_size=file_size,
-        status="uploaded",
+        status="processing",
         chunk_count=0,
         created_at=now,
         updated_at=now,
     )
 
-    db.add(instance)
+    db.add(db_document)
     await db.commit()
-    await db.refresh(instance)
+    await db.refresh(db_document)
 
-    return _to_document_response(instance)
+    # Index document with RAG
+    try:
+        result = rag_service.index_document(
+            document_id=str(db_document.id),
+            file_path=str(file_path),
+            filename=file.filename,
+        )
+
+        if result["success"]:
+            db_document.status = "indexed"
+            db_document.chunk_count = result["chunks"]
+        else:
+            db_document.status = "failed"
+            # Log error for observability
+            print(f"Indexing failed: {result.get('error')}")
+
+        db_document.updated_at = datetime.utcnow()
+        await db.commit()
+        await db.refresh(db_document)
+    except Exception as exc:  # defensive
+        db_document.status = "failed"
+        db_document.updated_at = datetime.utcnow()
+        await db.commit()
+        print(f"RAG indexing error: {exc}")
+
+    return DocumentUploadResponse(
+        id=db_document.id,
+        filename=db_document.filename,
+        status=db_document.status,
+        chunks=db_document.chunk_count or 0,
+    )
 
 
 @router.get("", response_model=DocumentListResponse)
@@ -118,20 +165,31 @@ async def get_document(
     return _to_document_response(instance)
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_document(id: UUID, db: AsyncSession = Depends(get_db)) -> None:
-    stmt = select(Document).where(Document.id == id)
-    result = await db.execute(stmt)
-    instance = result.scalar_one_or_none()
+@router.delete("/{document_id}")
+async def delete_document(
+    document_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Delete a document and its index."""
+    result = await db.execute(select(Document).where(Document.id == document_id))
+    document = result.scalar_one_or_none()
 
-    if instance is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found",
-        )
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
 
-    await db.delete(instance)
+    # Delete from vector store
+    try:
+        rag_service.delete_document(str(document_id))
+    except Exception as exc:
+        print(f"Error deleting from vector store: {exc}")
+
+    # Delete file from disk
+    if getattr(document, "file_path", None) and os.path.exists(document.file_path):
+        os.remove(document.file_path)
+
+    # Delete from database
+    await db.delete(document)
     await db.commit()
 
-    return None
+    return {"status": "deleted", "id": str(document_id)}
 

@@ -1,0 +1,18 @@
+Payment System Architecture
+
+The payment module handles all financial transactions in the e-commerce platform.
+
+Components:
+- PaymentGateway: Connects to Stripe and PayPal APIs
+- CartService: Manages shopping cart state in Redis cache
+- OrderService: Creates orders in PostgreSQL database
+- NotificationService: Sends email confirmations via SendGrid
+
+Known Issues:
+- Cart data is stored in Redis with a 24-hour TTL
+- Session-based cart does not persist across browser refreshes unless user is logged in
+- Guest checkout carts are tied to session cookies
+
+Error Handling:
+- Payment failures return error code PAY-001 through PAY-010
+- Cart sync issues log to payment-errors.log

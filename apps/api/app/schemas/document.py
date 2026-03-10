@@ -24,6 +24,9 @@ class DocumentListResponse(BaseModel):
     total: int
 
 
-class DocumentUploadResponse(DocumentResponse):
-    pass
+class DocumentUploadResponse(BaseModel):
+    id: UUID
+    filename: str
+    status: str
+    chunks: int = 0
 

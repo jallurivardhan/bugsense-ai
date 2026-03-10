@@ -1,0 +1,31 @@
+Authentication System Documentation
+
+Overview:
+The auth module handles user authentication and session management for the platform.
+
+Components:
+- AuthController: Handles login/logout API endpoints
+- JWTService: Creates and validates JSON Web Tokens with 15-minute expiry
+- SessionManager: Stores active sessions in Redis with 7-day TTL
+- PasswordHasher: Uses bcrypt with 12 rounds for password hashing
+- RateLimiter: Blocks IPs after 5 failed login attempts for 30 minutes
+
+Login Flow:
+1. User submits email and password to /api/auth/login
+2. AuthController validates credentials against PostgreSQL users table
+3. On success, JWTService generates access token (15 min) and refresh token (7 days)
+4. SessionManager stores session in Redis
+5. Tokens returned to client in HTTP-only cookies
+
+Known Issues:
+- JWT tokens not invalidated on password change
+- Session not cleared on logout in some edge cases
+- Rate limiter can be bypassed using IPv6 addresses
+- Password reset emails sometimes delayed by 2-3 minutes
+
+Error Codes:
+- AUTH-001: Invalid credentials
+- AUTH-002: Account locked (too many attempts)
+- AUTH-003: Token expired
+- AUTH-004: Session not found
+- AUTH-005: Password too weak
