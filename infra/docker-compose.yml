@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_assistant
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    depends_on:
+      - db
+    volumes:
+      - ../apps/api:/app
+      - ../data:/data
+    networks:
+      - ai-assistant-network
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ai-assistant-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ai-assistant-network:
+    driver: bridge
