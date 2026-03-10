@@ -22,7 +22,6 @@ class TestGenerationResponse(BaseModel):
     requirement: str
     include_gherkin: bool
     tests: List[TestCase]
-    metadata: Optional[Dict[str, Any]] = None
     model_version: str
     prompt_version: str
     latency_ms: int
