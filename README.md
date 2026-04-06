@@ -1,5 +1,7 @@
 # BugSense AI
 
+![BugSense AI Dashboard](./images/dashboard.png)
+
 An AI-powered bug analysis and test case generation platform built for QA teams. The system uses Large Language Models with Retrieval-Augmented Generation (RAG) to automate bug classification and generate test cases from feature descriptions.
 
 ## Problem Statement
