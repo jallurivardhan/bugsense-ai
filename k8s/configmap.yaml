@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bugsense-config
+  namespace: bugsense
+data:
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "bugsense"
+  CHROMA_HOST: "chromadb-service"
+  CHROMA_PORT: "8000"
+  OLLAMA_HOST: "http://ollama-service:11434"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  DEBUG: "false"
+  AI_PROVIDER: "auto"
+  # JSON array for Pydantic Settings (browser + local dev)
+  CORS_ORIGINS: '["http://bugsense.local","https://bugsense.local","http://localhost:3000"]'

@@ -1,0 +1,175 @@
+# Software Bug Severity and Priority Classification Guidelines
+
+## Overview
+This document defines the standard criteria for classifying software bugs by severity and priority. Use these guidelines to ensure consistent bug triage across all projects.
+
+---
+
+## SEVERITY LEVELS
+
+### CRITICAL
+**Definition:** System is completely unusable or causes data loss/security breach.
+
+**Criteria:**
+- Application crash affecting all users
+- Data loss or corruption
+- Security vulnerability exposing user data
+- Payment/financial transaction failures
+- Authentication/login completely broken
+- Core functionality completely unavailable
+
+**Examples:**
+- "Payment gateway returning 500 error - no purchases possible"
+- "User passwords exposed in plain text logs"
+- "Database connection failed - application down"
+- "All user sessions terminated unexpectedly"
+
+**Response Time:** Immediate (within 1 hour)
+
+---
+
+### HIGH
+**Definition:** Major feature is broken with no workaround available.
+
+**Criteria:**
+- Key feature not working for significant user segment
+- Performance degradation affecting user experience severely
+- Integration with critical third-party service broken
+- Data not syncing correctly
+- Mobile app crashing for specific device/OS
+
+**Examples:**
+- "Search functionality returning no results"
+- "File upload failing for files over 5MB"
+- "Push notifications not being delivered"
+- "Checkout flow broken on mobile devices"
+
+**Response Time:** Same business day (within 8 hours)
+
+---
+
+### MEDIUM
+**Definition:** Feature partially working or degraded experience with workaround available.
+
+**Criteria:**
+- Feature works but with limitations
+- Performance is slow but functional
+- UI/UX issues that confuse users
+- Non-critical data display issues
+- Workaround exists but is inconvenient
+
+**Examples:**
+- "Dashboard loading takes 15 seconds"
+- "Filter dropdown showing wrong default value"
+- "Export to PDF missing some formatting"
+- "Timezone showing incorrectly for some users"
+
+**Response Time:** Within 1 week
+
+---
+
+### LOW
+**Definition:** Minor issue with minimal user impact, cosmetic problems.
+
+**Criteria:**
+- Visual/cosmetic issues only
+- Typos and grammar errors
+- Minor UI inconsistencies
+- Edge cases affecting very few users
+- Nice-to-have improvements
+
+**Examples:**
+- "Button hover color doesn't match design system"
+- "Copyright year shows 2023 instead of 2024"
+- "Tooltip appears 2 seconds late"
+- "Favicon not showing on Firefox"
+
+**Response Time:** When time permits / Next sprint
+
+---
+
+## PRIORITY LEVELS
+
+### P1 - Immediate
+- Fix immediately, all other work stops
+- Usually paired with Critical severity
+- Requires hotfix deployment
+
+### P2 - High Priority
+- Fix in current sprint
+- Usually paired with High severity
+- Can wait for regular deployment
+
+### P3 - Normal Priority
+- Fix in next 1-2 sprints
+- Usually paired with Medium severity
+- Scheduled with regular backlog
+
+### P4 - Low Priority  
+- Fix when time permits
+- Usually paired with Low severity
+- May be deferred indefinitely
+
+---
+
+## SEVERITY vs PRIORITY MATRIX
+
+| Severity | Typical Priority | Exception Cases |
+|----------|-----------------|-----------------|
+| Critical | P1 | Never lower than P1 |
+| High | P2 | P1 if affecting revenue |
+| Medium | P3 | P2 if customer-reported |
+| Low | P4 | P3 if easy quick fix |
+
+---
+
+## CLASSIFICATION KEYWORDS
+
+### Critical Keywords
+payment, security, breach, crash, down, data loss, authentication, login failed, 500 error, database, corruption, unauthorized
+
+### High Keywords
+broken, not working, failing, timeout, sync, integration, mobile crash, upload failed, notifications
+
+### Medium Keywords
+slow, loading, delay, incorrect, wrong, formatting, display issue, workaround, partially
+
+### Low Keywords
+typo, cosmetic, color, font, spacing, alignment, tooltip, icon, animation, minor
+
+---
+
+## DECISION TREE
+
+1. **Does it cause data loss or security risk?** → CRITICAL P1
+2. **Is core functionality completely broken?** → CRITICAL P1
+3. **Is a major feature broken with no workaround?** → HIGH P2
+4. **Is the feature degraded but still usable?** → MEDIUM P3
+5. **Is it purely cosmetic with no functional impact?** → LOW P4
+
+---
+
+## EXAMPLES BY DOMAIN
+
+### E-Commerce
+- Critical: Payment failed, cart data lost, prices showing $0
+- High: Search broken, checkout slow, images not loading
+- Medium: Filters wrong, pagination off, slow category pages
+- Low: Footer typo, button color, tooltip delay
+
+### SaaS/Project Management
+- Critical: Cannot create projects, data deleted, permissions bypassed
+- High: Drag-drop broken, notifications delayed, sync failed
+- Medium: Dashboard slow, export issues, timezone wrong
+- Low: Dark mode contrast, animation janky, breadcrumbs wrong
+
+### FinTech/Payments
+- Critical: Money stuck, duplicate charges, security bypass
+- High: Card rejected, recurring payments skipped, QR timeout
+- Medium: Search limited, statements slow, categories wrong
+- Low: Badge count wrong, dark mode, profile crop
+
+---
+
+Document Version: 1.0
+Last Updated: April 2024

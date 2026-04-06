@@ -1,4 +1,4 @@
-Write-Host "Starting AI Assistant for Software Testing - Development Mode"
+Write-Host "Starting BugSense AI (AI Assistant for Software Testing) - Development Mode"
 Write-Host "============================================================"
 
 try {

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -6,16 +7,25 @@ from chromadb.config import Settings as ChromaSettings
 
 
 class VectorStore:
-  """ChromaDB vector store for document chunks."""
+  """ChromaDB vector store for document chunks (local persist or remote HttpClient)."""
 
   def __init__(self, persist_directory: str = "./data/chroma") -> None:
-    # Ensure directory exists
-    Path(persist_directory).mkdir(parents=True, exist_ok=True)
+    chroma_host = (os.getenv("CHROMA_HOST") or "").strip()
+    chroma_port = int(os.getenv("CHROMA_PORT") or "8000")
+    chroma_settings = ChromaSettings(anonymized_telemetry=False)
 
-    self.client = chromadb.PersistentClient(
-      path=persist_directory,
-      settings=ChromaSettings(anonymized_telemetry=False),
-    )
+    if chroma_host:
+      self.client = chromadb.HttpClient(
+        host=chroma_host,
+        port=chroma_port,
+        settings=chroma_settings,
+      )
+    else:
+      Path(persist_directory).mkdir(parents=True, exist_ok=True)
+      self.client = chromadb.PersistentClient(
+        path=persist_directory,
+        settings=chroma_settings,
+      )
 
     # Get or create collection
     self.collection = self.client.get_or_create_collection(

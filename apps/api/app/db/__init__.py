@@ -1,9 +1,12 @@
-from app.db.database import Base, engine, async_session, get_db
+﻿from app.db.database import Base, engine, async_session, get_db
 from app.db.models import (
     BenchmarkRun,
+    BenchmarkTestCaseModel,
     BugAnalysis,
+    CustomExample,
     Document,
     DocumentChunk,
+    LearnedPatterns,
     TestGeneration,
 )
 
@@ -17,5 +20,7 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "BenchmarkRun",
+    "BenchmarkTestCaseModel",
+    "CustomExample",
+    "LearnedPatterns",
 ]
-

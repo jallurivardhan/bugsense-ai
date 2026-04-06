@@ -1,1 +1,1 @@
-# AI Assistant for Software Testing - API Package
+# BugSense AI — AI Assistant for Software Testing (API package)

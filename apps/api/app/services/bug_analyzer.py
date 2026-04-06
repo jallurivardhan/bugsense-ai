@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 from app.services.ai_service import ai_service
+from app.services.custom_examples_service import custom_examples_service
 from app.services.prompts import (
     BUG_ANALYSIS_SYSTEM_PROMPT,
     BUG_ANALYSIS_USER_PROMPT,
@@ -56,6 +57,10 @@ class BugAnalyzer:
             environment=environment or "Not specified",
             rag_context=rag_context,
         )
+
+        custom_context = custom_examples_service.get_examples_prompt()
+        if custom_context:
+            prompt = f"{prompt}\n{custom_context}"
 
         result = self.ai.generate(prompt, BUG_ANALYSIS_SYSTEM_PROMPT)
 

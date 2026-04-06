@@ -1,0 +1,277 @@
+# TUI-Style Travel Booking System - Bug Pattern Knowledge Base
+
+## Overview
+This document contains 500 categorized bugs commonly found in travel booking platforms like TUI, Jet2, Expedia, and Booking.com. Use this knowledge to analyze and triage travel-industry bugs accurately.
+
+---
+
+## CRITICAL BUGS (Severity: Critical, Priority: P1)
+These bugs cause immediate revenue loss, data breaches, or legal violations.
+
+### Payment & Financial
+- BUG-004: Double charge on card when clicking Pay button twice - Card charged twice for same booking
+- BUG-298: Deposit amount shown but full payment taken - Expected £100 deposit but £800 charged
+- BUG-013: Currency conversion using outdated rates - GBP to EUR conversion 3 months old, customers overcharged 8%
+
+### Security & Data
+- BUG-011: Passwords stored in plain text in database - Major GDPR violation
+- BUG-014: Session hijacking vulnerability in login - Account takeover possible
+- BUG-018: API returning other customers booking details - No ownership verification
+- BUG-020: Production database credentials in GitHub repo - Database compromised
+- BUG-366: Agent override pricing visible to customers - Staff discounts exposed
+- BUG-496: Resort webcam embed causing XSS vulnerability - Unvalidated URL parameter
+
+### Booking & Availability
+- BUG-001: Flight search returns no results for valid route - System shows no flights when inventory exists
+- BUG-005: Hotel room inventory shows negative availability - Overbooking occurring
+- BUG-009: Database connection timeout during peak hours - All booking attempts fail 7-9 PM
+- BUG-130: Night count calculation wrong - 7 nights selected shows 8 nights pricing
+- BUG-482: Peak pricing displayed as standard pricing - Christmas week showing wrong prices
+
+### Compliance & Legal
+- BUG-010: SSL certificate expired on payment page - Customers abandoning checkout
+- BUG-017: Credit card CVV visible in confirmation email - PCI violation
+- BUG-500: Customer data breach notification delayed - 48h GDPR requirement not met
+
+### Documents & Communications
+- BUG-003: Booking confirmation not sent after payment - Customer has no proof of booking
+- BUG-136: QR code on boarding pass not scanning - Airport scanners cannot read code
+- BUG-179: Gift card purchase confirmation missing card code - Cannot use purchased gift card
+- BUG-278: Insurance claim form link returning 404 - Cannot access claims when needed
+
+---
+
+## HIGH SEVERITY BUGS (Severity: High, Priority: P1-P2)
+These bugs significantly impact customer experience or cause financial discrepancies.
+
+### Flight Booking Issues
+- BUG-074: Flight duration calculated incorrectly - 4h showing instead of 8h
+- BUG-007: All flight times showing in UTC instead of local - Customers missing flights
+- BUG-126: Connecting flight terminal information missing - No terminal for connections
+- BUG-145: Incorrect airport code displayed - Booking shows wrong airport
+- BUG-154: Codeshare showing wrong baggage allowance - 23kg shown but only 20kg allowed
+
+### Hotel Booking Issues
+- BUG-047: Hotel board basis changing after selection - All-Inclusive becomes Half-Board
+- BUG-149: Hotel cancellation policy not matching supplier - Free cancellation but hotel charges
+- BUG-173: Hotel renovation notice not displayed - Active building work not mentioned
+- BUG-342: Balcony room guarantee not guaranteed - Subject to availability asterisk
+
+### Pricing Issues
+- BUG-006: Price changes by £300 after adding insurance - £45 insurance costs £300 extra
+- BUG-008: Child discount not applied for family bookings - Children charged adult price
+- BUG-031: Group booking not triggering group discount - Party of 12 paying individual rate
+- BUG-036: Cancellation refund calculated incorrectly - 80% refund instead of 100%
+- BUG-150: Seat selection fee doubled for return flights - £20 per segment charged as £40
+
+### Authentication & Accounts
+- BUG-015: Entire booking history deleted after password reset - Bookings disappear
+- BUG-037: Two-factor authentication SMS not delivered - Customers locked out
+- BUG-152: Manage booking password reset loop - Immediate re-reset required
+
+### Payments
+- BUG-002: Payment fails with Amex cards - Listed as accepted but fails
+- BUG-034: Credit card form not accepting valid numbers - Valid Visa rejected
+- BUG-040: Direct debit setup failing for all UK banks - Payment plans broken
+- BUG-045: Gift card balance not deducted from total - £100 card applied but full price shown
+- BUG-139: Third-party cookie blocking breaking checkout - Safari ITP causing failures
+- BUG-197: Payment 3D Secure popup blocked by browser - Authentication fails
+
+### Integration Issues
+- BUG-016: Flight cancellation not updating hotel booking - Customer arrives with no booking
+- BUG-027: Wheelchair assistance not transmitted to airline - Special assistance not received
+- BUG-095: Airport transfer pickup time not adjusting for flight changes - Wrong pickup time
+
+---
+
+## MEDIUM SEVERITY BUGS (Severity: Medium, Priority: P2-P3)
+These bugs cause inconvenience but have workarounds.
+
+### Search & Filter Issues
+- BUG-021: Search autocomplete not showing popular destinations - No suggestions
+- BUG-039: Search results not sorted by price correctly - Wrong sort order
+- BUG-087: Flexible dates search returning fixed dates only - +/- 3 days ignored
+- BUG-120: Flight class filter not working - Business filter shows Economy
+- BUG-195: Direct only filter showing connecting flights - Toggle ignored
+- BUG-421: Search by hotel name too fuzzy - 'Beach' matches everything
+
+### Display & UI Issues
+- BUG-026: Hotel photos not loading on search results - Broken image icons
+- BUG-050: Resort map not loading on detail page - Infinite spinner
+- BUG-066: Room upgrade offer for already upgraded room - Suite offered to suite booker
+- BUG-070: Destination weather showing wrong data - Paris France showing Texas weather
+- BUG-089: Trip countdown widget off by one day - 5 days shown when 6 days remain
+
+### Content & Data Issues
+- BUG-041: Hotel star rating showing incorrect values - 5-star showing as 3-star
+- BUG-057: Third party review scores not updating - 2023 data showing
+- BUG-101: Hotel WiFi speed information outdated - 'High-speed' but only 2Mbps
+- BUG-106: Hotel distance from beach using straight line - 50m stated but 800m walk
+- BUG-128: Autocomplete suggesting discontinued destinations - Closed resorts shown
+
+### Form & Validation Issues
+- BUG-054: Address validation rejecting valid UK postcodes - SW1A 1AA rejected
+- BUG-102: Passenger title dropdown missing 'Mx' option - Non-binary excluded
+- BUG-108: Password strength meter not matching requirements - Strong shown but rejected
+- BUG-166: Phone number validation rejecting international formats - +44 7xxx rejected
+- BUG-207: Email validation accepting invalid formats - test@test with no TLD accepted
+
+### Mobile & App Issues
+- BUG-023: Mobile app crashes when selecting dates - iOS crash on date picker
+- BUG-048: App notification permissions crash on iOS 17 - Crash on permission request
+- BUG-078: App deep links opening wrong screen - Notification opens homepage
+- BUG-104: Mobile keyboard covering input fields - Android keyboard overlaps forms
+- BUG-239: Passport scanner not recognising UK passports - OCR fails on UK biometric
+
+### Email & Notification Issues
+- BUG-053: Check-in email sent for cancelled booking - Cancelled flight check-in prompt
+- BUG-084: Newsletter unsubscribe not working - Emails keep coming
+- BUG-097: Price alert email linking to expired deal - Unavailable package linked
+- BUG-124: Confirmation email going to spam - 90% flagged by Gmail
+- BUG-212: Booking confirmation showing HTML entities - Cancún displays as Cancún
+
+### RAG-Relevant Patterns
+When analyzing travel bugs, look for these component patterns:
+
+1. **Payment Components**: Gateway, 3D Secure, card validation, currency conversion
+2. **Flight Components**: GDS, seat maps, baggage, schedule changes, codeshares
+3. **Hotel Components**: Inventory, room types, board basis, amenities, cancellation
+4. **User Components**: Authentication, sessions, profiles, loyalty points
+5. **Integration Components**: Airlines, hotels, transfers, insurance, excursions
+6. **Compliance Components**: GDPR, PCI, ATOL, accessibility, legal terms
+
+---
+
+## LOW SEVERITY BUGS (Severity: Low, Priority: P4)
+These are cosmetic issues or minor inconveniences.
+
+### Content & Copy Issues
+- BUG-089: Trip countdown widget off by one day
+- BUG-101: Hotel WiFi speed information outdated
+- BUG-125: Resort restaurant menu PDF corrupted
+- BUG-129: Upgrade offer email sent after trip completed
+- BUG-143: Hotel photo gallery thumbnails pixelated
+- BUG-155: Checkout progress bar misleading
+- BUG-158: Resort webcam links broken
+- BUG-172: No confirmation when adding to wishlist
+- BUG-202: All-inclusive wristband colour not communicated
+
+### UI Polish Issues
+- BUG-192: TripAdvisor link opening in same tab
+- BUG-252: Pagination showing wrong total count
+- BUG-282: Duplicate push notification
+- BUG-318: Review source not attributed
+- BUG-324: Compare hotels losing scroll position
+- BUG-396: Credit card logo using outdated designs
+- BUG-399: Mobile navigation menu not closing
+
+---
+
+## COMPONENT REFERENCE
+
+### Payment System Components
+- PaymentGateway: Handles card processing
+- CurrencyConverter: FX rate calculations
+- RefundProcessor: Cancellation refunds
+- GiftCardService: Gift card redemption
+- SplitPayment: Deposit/balance handling
+
+### Flight System Components
+- FlightSearch: Availability queries
+- SeatMap: Seat selection interface
+- BaggageService: Luggage allowances
+- ScheduleManager: Flight time changes
+- CodeshareResolver: Partner airline mapping
+
+### Hotel System Components
+- InventoryManager: Room availability
+- RoomTypeMapper: Category assignments
+- BoardBasisService: Meal plan handling
+- AmenityTracker: Facility listings
+- CancellationPolicy: Refund rules engine
+
+### User System Components
+- AuthController: Login/logout handling
+- SessionManager: Session persistence
+- ProfileService: Customer data
+- LoyaltyEngine: Points calculation
+- PreferenceStore: Saved settings
+
+### Integration Components
+- AirlineConnector: GDS integration
+- HotelSupplier: Property feeds
+- TransferProvider: Ground transport
+- InsurancePartner: Policy management
+- ExcursionAPI: Activity bookings
+
+---
+
+## SEVERITY ASSIGNMENT RULES
+
+### Critical (Immediate action required)
+- Payment processing failures
+- Security vulnerabilities
+- Data breaches or GDPR violations
+- Booking loss or corruption
+- Revenue-impacting pricing errors
+
+### High (Fix within 24-48 hours)
+- Major functionality broken
+- Significant UX degradation
+- Integration failures
+- Compliance risks
+- Customer-facing data errors
+
+### Medium (Fix within 1-2 weeks)
+- Features partially working
+- Inconvenient workarounds exist
+- Non-critical data issues
+- Minor compliance gaps
+- Performance degradation
+
+### Low (Fix when convenient)
+- Cosmetic issues
+- Copy/grammar errors
+- Outdated content
+- Minor UI inconsistencies
+- Enhancement requests
+
+---
+
+## PRIORITY ASSIGNMENT RULES
+
+### P1 (Fix immediately)
+- Production down
+- Security breach
+- Legal violation
+- Complete feature failure
+
+### P2 (Fix this sprint)
+- Major feature degraded
+- Significant user impact
+- Compliance deadline approaching
+
+### P3 (Fix next sprint)
+- Feature inconvenience
+- Workaround available
+- Limited user impact
+
+### P4 (Backlog)
+- Nice to have fixes
+- Polish and refinement
+- Low user visibility
+
+---
+
+## COMMON ROOT CAUSES
+
+1. **Data Synchronization**: Third-party feeds not updating
+2. **Timezone Handling**: UTC vs local time confusion
+3. **Cache Staleness**: Prices/availability outdated
+4. **Integration Timeouts**: Supplier APIs slow/failing
+5. **Validation Gaps**: Input not properly checked
+6. **State Management**: Client-side data loss
+7. **Mobile Responsiveness**: Desktop-only testing
+8. **Accessibility Oversight**: Screen reader compatibility
+9. **Localization Errors**: Currency/language issues
+10. **Compliance Drift**: Regulations changed since launch

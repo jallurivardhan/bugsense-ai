@@ -1,9 +1,25 @@
-from typing import List
-from uuid import UUID
+import html
+from io import BytesIO
+from typing import Any, List
+
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import (
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
 from app.db import get_db
 from app.db.models import BugAnalysis
@@ -16,6 +32,12 @@ from app.schemas import (
 from app.services.bug_analyzer import bug_analyzer
 
 router = APIRouter()
+
+
+def _pdf_escape(text: str | None) -> str:
+    if text is None:
+        return ""
+    return html.escape(str(text), quote=False)
 
 
 def _to_bug_analysis_response(model: BugAnalysis) -> BugAnalysisResponse:
@@ -120,6 +142,173 @@ async def list_bug_analyses(
     return BugAnalysisListResponse(
         items=[_to_bug_analysis_response(row) for row in rows],
         total=total,
+    )
+
+
+@router.get("/{analysis_id}/pdf")
+async def export_bug_analysis_pdf(
+    analysis_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Export a bug analysis as a PDF report."""
+    result = await db.execute(
+        select(BugAnalysis).where(BugAnalysis.id == analysis_id)
+    )
+    analysis = result.scalar_one_or_none()
+
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found",
+        )
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        topMargin=0.5 * inch,
+        bottomMargin=0.5 * inch,
+    )
+    styles = getSampleStyleSheet()
+    story: List[Any] = []
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=18,
+        spaceAfter=20,
+        textColor=colors.HexColor("#1a1a1a"),
+    )
+
+    heading_style = ParagraphStyle(
+        "CustomHeading",
+        parent=styles["Heading2"],
+        fontSize=14,
+        spaceBefore=15,
+        spaceAfter=10,
+        textColor=colors.HexColor("#333333"),
+    )
+
+    body_style = ParagraphStyle(
+        "CustomBody",
+        parent=styles["Normal"],
+        fontSize=11,
+        spaceAfter=8,
+        leading=14,
+    )
+
+    story.append(Paragraph("Bug Analysis Report", title_style))
+    story.append(
+        Paragraph(
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            styles["Normal"],
+        )
+    )
+    story.append(Spacer(1, 20))
+
+    story.append(Paragraph("Bug Details", heading_style))
+    story.append(
+        Paragraph(f"<b>Title:</b> {_pdf_escape(analysis.title)}", body_style)
+    )
+    story.append(
+        Paragraph(
+            f"<b>Description:</b> {_pdf_escape(analysis.description)}",
+            body_style,
+        )
+    )
+    story.append(
+        Paragraph(
+            f"<b>Environment:</b> {_pdf_escape(analysis.environment or 'Not specified')}",
+            body_style,
+        )
+    )
+    story.append(Spacer(1, 15))
+
+    story.append(Paragraph("Analysis Results", heading_style))
+
+    results_data = [
+        ["Severity", "Priority", "Component"],
+        [
+            analysis.severity or "N/A",
+            analysis.priority or "N/A",
+            analysis.component or "N/A",
+        ],
+    ]
+
+    results_table = Table(results_data, colWidths=[2 * inch, 2 * inch, 2.5 * inch])
+    results_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f4f6")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#374151")),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 11),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("TOPPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, 1), colors.white),
+                ("FONTSIZE", (0, 1), (-1, 1), 12),
+                ("BOTTOMPADDING", (0, 1), (-1, 1), 10),
+                ("TOPPADDING", (0, 1), (-1, 1), 10),
+                ("GRID", (0, 0), (-1, -1), 1, colors.HexColor("#e5e7eb")),
+            ]
+        )
+    )
+    story.append(results_table)
+    story.append(Spacer(1, 20))
+
+    repro_steps = [
+        s.strip()
+        for s in (analysis.repro_steps or "").split("\n")
+        if s.strip()
+    ]
+    if repro_steps:
+        story.append(Paragraph("Reproduction Steps", heading_style))
+        for i, step in enumerate(repro_steps, 1):
+            story.append(
+                Paragraph(f"{i}. {_pdf_escape(step)}", body_style)
+            )
+        story.append(Spacer(1, 10))
+
+    if analysis.reasoning:
+        story.append(Paragraph("Reasoning", heading_style))
+        story.append(Paragraph(_pdf_escape(analysis.reasoning), body_style))
+        story.append(Spacer(1, 10))
+
+    missing_lines = [
+        s.strip()
+        for s in (analysis.missing_info or "").split("\n")
+        if s.strip()
+    ]
+    if missing_lines:
+        story.append(Paragraph("Missing Information", heading_style))
+        for item in missing_lines:
+            story.append(Paragraph(f"• {_pdf_escape(item)}", body_style))
+        story.append(Spacer(1, 10))
+
+    story.append(Spacer(1, 30))
+    story.append(Paragraph("Analysis Metadata", heading_style))
+    metadata_text = (
+        f"Model: {analysis.model_version or 'N/A'} | "
+        f"Latency: {analysis.latency_ms or 0:.0f}ms | "
+        f"Schema Valid: {'Yes' if analysis.schema_valid else 'No'}"
+    )
+    story.append(Paragraph(_pdf_escape(metadata_text), styles["Normal"]))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    safe_title = "".join(
+        c if c.isalnum() or c in (" ", "-", "_") else "_" for c in analysis.title[:30]
+    )
+    filename = f"bug_analysis_{safe_title}_{datetime.now().strftime('%Y%m%d')}.pdf"
+
+    return StreamingResponse(
+        iter([buffer.read()]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
     )
 
 

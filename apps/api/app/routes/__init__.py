@@ -1,4 +1,4 @@
-from app.routes import benchmarks, bug_analysis, documents, health, test_generation
+from app.routes import benchmarks, bug_analysis, dashboard, documents, health, test_generation
 
 __all__ = [
     "health",
@@ -6,4 +6,5 @@ __all__ = [
     "test_generation",
     "documents",
     "benchmarks",
+    "dashboard",
 ]

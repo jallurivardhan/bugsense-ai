@@ -1,0 +1,51 @@
+﻿title,description,expected_severity
+Payment gateway timeout during checkout,Customers cannot complete purchases. Payment API returns 503 errors. All transactions failing since 9 AM. Revenue loss estimated at 50000 per hour.,Critical
+Database connection pool exhausted,Application throwing connection pool exhausted errors during peak hours. 40% of API requests failing. Auto-recovers after traffic decreases.,Critical
+SSL certificate expired on payment domain,Production SSL certificate expired. All HTTPS traffic to payment subdomain failing. Customers see security warnings.,Critical
+User funds showing negative balance,Multiple users reporting negative account balances. Data integrity issue in transaction ledger. Affects approximately 200 accounts.,Critical
+Duplicate charges on credit cards,Customers charged twice for single transactions. Payment retry logic creating duplicates. 47 cases identified totaling 12500 dollars.,Critical
+Two-factor authentication not sending codes,SMS codes for 2FA not being delivered. Users locked out of accounts. Affects all users trying to login.,Critical
+Wire transfer stuck in pending state,International wire transfers stuck in pending for over 48 hours. Funds neither credited nor returned. 15 transactions affected.,Critical
+Account lockout after password reset,Users who reset password cannot login. Error says invalid credentials. Workaround is to reset password again.,High
+Search functionality returning no results,Product search returns no results for valid queries. Category browsing still works as workaround.,High
+Mobile app crashes on transaction history,iOS app crashes when viewing transaction history longer than 30 days. Android works fine.,High
+Export to PDF missing transaction data,Monthly statement PDF export missing last 5 days of transactions. CSV export works correctly.,High
+Push notifications delayed by hours,Transaction alerts arriving 2-3 hours after transaction. Real-time alerting broken.,High
+Card activation failing for new cards,New card activation through app failing. Phone activation still works as workaround.,High
+Scheduled payments executing twice,Some scheduled payments executing on both scheduled date and day after. Random occurrence.,High
+Dashboard loading takes 30 seconds,Main dashboard takes 30 seconds to load. Users see blank screen with spinner. Other pages load normally.,Medium
+Currency conversion showing wrong rates,Exchange rates displayed are 24 hours old. Actual transactions use correct rates.,Medium
+Transaction categories assigned incorrectly,Auto-categorization putting restaurant charges in travel category. Manual recategorization works.,Medium
+Date picker showing wrong month default,Date range picker defaults to previous month instead of current month.,Medium
+Chart tooltips cut off on mobile,Spending chart tooltips extend beyond screen edge on mobile devices.,Medium
+Filter dropdown not clearing properly,Transaction filters remain applied after clicking clear. Page refresh fixes issue.,Medium
+Pagination showing incorrect total,Transaction list shows 100 total but only 87 transactions exist.,Medium
+Sort by amount not working correctly,Sorting transactions by amount treats numbers as strings. 9 appears after 80.,Medium
+Account nickname character limit unclear,Users not told about 20 character limit until after trying to save longer name.,Low
+Favicon not showing on Firefox,Bank favicon displays correctly on Chrome and Safari but not Firefox.,Low
+Loading spinner animation stutters,Loading animation has visible stutter on slower devices.,Low
+Copyright year shows 2023,Footer displays 2023 instead of 2024. Purely cosmetic issue.,Low
+Button hover color slightly off,Primary button hover state different shade than design spec.,Low
+Tooltip appears with delay,Help tooltips take 2 seconds to appear instead of instant.,Low
+Dark mode toggle animation janky,Dark mode transition has visible flicker during switch.,Low
+Profile picture crop tool imprecise,Image crop tool difficult to position precisely on mobile.,Low
+Recurring payment skip confirmation unclear,Skip payment confirmation modal text could be clearer.,Medium
+Statement download filename generic,Downloaded statements named statement.pdf instead of including date.,Low
+Session timeout warning not shown,Users logged out without warning after 15 minutes idle.,Medium
+Keyboard navigation broken in forms,Tab key skips over some form fields. Mouse click required.,Medium
+Auto-logout during active typing,Session expires while user actively filling long form.,High
+Beneficiary search case sensitive,Must match exact case when searching saved beneficiaries.,Medium
+Transaction memo truncated in list,Long transaction memos cut off without indication of more text.,Low
+Print view missing header information,Printed statements missing account number and date range.,Medium
+Accessibility contrast issues,Some text fails WCAG contrast requirements in light mode.,Medium
+Screen reader skipping form labels,VoiceOver not reading labels for amount input fields.,Medium
+Refresh token not extending session,Clicking refresh should extend session but does not work.,High
+API rate limit message unhelpful,Rate limit error just says try again without indicating when.,Medium
+Batch payment file format strict,Batch upload rejects files with extra whitespace in headers.,Medium
+Notification preferences not saving,Email notification toggles reset after leaving settings page.,High
+Transaction search date range limited,Cannot search transactions older than 12 months in app.,Medium
+Help chat widget overlaps content,Support chat bubble covers important buttons on mobile.,Low
+Biometric login fails after app update,Face ID and fingerprint stop working until re-enrolled after updates.,High
+Card freeze status sync delay,Frozen card status takes up to 5 minutes to reflect in app.,Medium
+Investment portfolio chart wrong colors,Asset allocation pie chart colors dont match legend.,Low
+Dividend history missing recent entries,Last 3 dividend payments not showing in history tab.,Medium

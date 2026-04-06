@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting AI Assistant for Software Testing - Development Mode"
+echo "Starting BugSense AI (AI Assistant for Software Testing) - Development Mode"
 echo "============================================================"
 
 if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
